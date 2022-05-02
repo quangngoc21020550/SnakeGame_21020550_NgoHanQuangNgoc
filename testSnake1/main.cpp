@@ -18,6 +18,7 @@ bool systemRun = true;
 bool menuRun = true;
 bool gameRun = true;
 bool menuOn = true;
+bool playAgain = false;
 const SDL_Color CYAN_COLOR = {0, 255, 255};
 const SDL_Color BLUE_COLOR = {0, 0, 255};
 const SDL_Color ORANGE_COLOR = {255, 165, 0};
@@ -37,7 +38,8 @@ struct Apple  {
     int size;
     int nutri;
     SDL_Rect location;
-    Apple(SDL_Window* window, SDL_Renderer* renderer_, SDL_Rect _location, int _size = 0, int _nutri =1)
+    string type = "";
+    Apple(SDL_Window* window, SDL_Renderer* renderer_, SDL_Rect _location, int _size = 0, int _nutri =1,string _type = "")
      : renderer(renderer_)
     {
          int width, height;
@@ -52,6 +54,12 @@ struct Apple  {
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_RenderFillRect(renderer, &location);
     }
+    void printShield() {
+        if (type == "shield") {
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            SDL_RenderFillRect(renderer, &location);
+        }
+    }
 };
 struct Snake {
     SDL_Renderer *renderer;
@@ -59,8 +67,9 @@ struct Snake {
     SDL_Rect head;
     string direction = "";
     int size = 1;
+    bool shield = false;
     deque<SDL_Rect> fullBody;
-    Snake(SDL_Window* window, SDL_Renderer* renderer_,SDL_Color _color, SDL_Rect _head, string _direction, int _size =1)
+    Snake(SDL_Window* window, SDL_Renderer* renderer_,SDL_Color _color, SDL_Rect _head, string _direction, int _size =1, bool _shield = false)
      : renderer(renderer_)
     {
          int width, height;
@@ -71,6 +80,7 @@ struct Snake {
         direction = _direction;
         size = _size;
         color = _color;
+        shield = _shield;
     }
     void analyzeInput(SDL_Event &e) {
                 if (e.key.keysym.sym == SDLK_UP && direction != "DOWN" ) direction = "UP";
@@ -80,10 +90,10 @@ struct Snake {
     }
     void changeDir() {
 
-        if (direction=="UP") head.y -= 10;
-        else if (direction == "DOWN") head.y +=10;
-        else if (direction == "LEFT") head.x -=10;
-        else if (direction == "RIGHT") head.x += 10;
+        if (direction=="UP") head.y -= head.w;
+        else if (direction == "DOWN") head.y += head.w;
+        else if (direction == "LEFT") head.x -= head.w;
+        else if (direction == "RIGHT") head.x += head.w;
     }
     void checkOutScreen() {
         if (head.y < 0) head.y = SCREENH;
@@ -92,12 +102,19 @@ struct Snake {
         if (head.x > SCREENW) head.x = 0;
     }
 
-    void checkApple(Apple &apple) {
+    bool checkApple(Apple &apple) {
         if (head.x == apple.location.x && head.y == apple.location.y){
+            if(apple.type == "shield") {
+                shield = true;
+                color = BLUE_COLOR;
+            }
             apple.location.x =((rand()%SCREENW)/10)*10;
             apple.location.y = ((rand()%SCREENH)/10)*10;
             size += apple.nutri;
+            return true;
         }
+        return false;
+
     }
     void addBody() {
         fullBody.push_front(head);
@@ -109,14 +126,18 @@ struct Snake {
             SDL_RenderFillRect(renderer, s);
         }
     }
+
     void checkSeflLose(){
-        for (int i = 1 ; i < size;i++) {
-            if (head.x == fullBody[i].x && head.y == fullBody[i].y){
-                gameRun = false;
+        if (!shield) {
+            for (int i = 1 ; i < size;i++) {
+                if (head.x == fullBody[i].x && head.y == fullBody[i].y){
+                    gameRun = false;
+                }
             }
         }
     }
 };
+
 void logErr(string mess, bool err = false);
 void initSDL(SDL_Window* &win, SDL_Renderer* &ren);
 void quitSDL(SDL_Window* win, SDL_Renderer* ren);
@@ -124,9 +145,11 @@ void closePrg(int &dir, bool &run , SDL_Event e);
 SDL_Texture *loadTexture(string fileName, SDL_Renderer *ren);
 void renderTexture(SDL_Renderer* ren, SDL_Texture* tex, int x, int y, int w, int h);
 void takeInput(SDL_Event &e, Snake &snake);
-void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallApple);
-void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake);
+void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallApple, Apple &shield, bool &needShield, int &timeShield);
+void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake, Snake &menuSnake);
 void resetSnake(Snake &snake);
+void snakeRandomWalk(Snake &snake, int dir);
+
 
 int main(int argc, const char * argv[]) {
     // Khoi tao chuong trinh
@@ -139,27 +162,35 @@ int main(int argc, const char * argv[]) {
     string playerChoice = "";
     SDL_Event e;
     string direction = "";
+    int timeShield = 10000;
     SDL_Rect head1{500,500,10,10};
-    SDL_Rect apple{100,100,10,10};
+    SDL_Rect appleSmall{100,100,10,10};
+    SDL_Rect shieldHead{1000,100,10,10};
     int sizeSmallApple = 10;
-    int nutriSmallAplle = 30;
-    Apple smallApple(win, ren, apple,sizeSmallApple, nutriSmallAplle);
+    int nutriSmallApple = 30;
+    Apple smallApple(win, ren, appleSmall,sizeSmallApple, nutriSmallApple);
+    Apple shield(win, ren, shieldHead, sizeSmallApple, nutriSmallApple);
+    shield.type = "shield";
     deque<SDL_Rect> snake;
-    Snake snake1(win, ren, YELLOW_COLOR,head1, direction);
+    Snake snake1(win, ren, YELLOW_COLOR,head1, direction, true);
+    Snake menuSnake(win, ren, GREEN_COLOR, head1, direction);
+    bool needShield = false;
     while (systemRun) {
     // Menu
         //menuOn = true;
-        displayMenu(ren,e,snake1);
+        if(menuOn&&!playAgain) displayMenu(ren,e,snake1, menuSnake);
 
     // Tro choi
         //takeInput(e, snake1);
         gameRun = true;
         resetSnake(snake1);
         while (gameRun && systemRun) {
-            normalGame(ren,e,snake1,smallApple);
+            normalGame(ren,e,snake1,smallApple, shield, needShield, timeShield);
         }
+        playAgain = true;
         menuRun = true;
-        displayMenu(ren, e, snake1);
+        menuOn = true;
+        if(menuOn) displayMenu(ren, e, snake1, menuSnake);
     }
     // Ket thuc
     
@@ -218,28 +249,45 @@ void takeInput(SDL_Event &e, Snake &snake) {
         if (e.type == SDL_MOUSEBUTTONDOWN) {
             if (e.button.x >= 540 && e.button.y > 434 && e.button.x <= 540+320 && e.button.y <= 434+65 && menuOn)
                 menuRun = false;
-            if (e.button.x >= 540 && e.button.y > 529 && e.button.x <= 540+320 && e.button.y <= 529+63) {
+            if (e.button.x >= 540 && e.button.y > 529 && e.button.x <= 540+320 && e.button.y <= 529+63 && menuOn) {
                 //menuRun = false;
                 systemRun = false;
             }
         }
     }
 }
-void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallApple) {
+void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallApple, Apple &shield, bool &needShield, int &timeShield) {
     takeInput(e, snake1 );
+    
+    
+    
     
     snake1.changeDir();
     snake1.checkOutScreen();
-    snake1.checkApple(smallApple);
-
-    snake1.addBody();
     
+    
+    if(snake1.checkApple(smallApple)) {
+        if(1==1) {
+            needShield = true;
+        }
+    }
+    if (snake1.checkApple(shield)){
+        timeShield = 0;
+        needShield = false;
+    }
+    timeShield++;
+    snake1.addBody();
+    if(timeShield > 50) {snake1.shield = false; snake1.color = YELLOW_COLOR;}
+    else {snake1.color = BLUE_COLOR;}
     SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
     SDL_RenderClear(ren);
 
     snake1.printSnake();
     snake1.checkSeflLose();
+    
+    if(needShield) shield.printShield();
     smallApple.printApple();
+
     SDL_RenderPresent(ren);
     SDL_Delay(30);
 
@@ -262,11 +310,12 @@ void renderTexture(SDL_Renderer* ren, SDL_Texture* tex, int x, int y, int w, int
     SDL_RenderCopy(ren, tex, NULL, &dst);
 }
 
-void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake) {
+void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake, Snake &menuSnake) {
     SDL_Texture *menu = loadTexture("/Users/quangngoc0811/Downloads/blackbg.bmp", ren);
     SDL_Texture *playIcon = loadTexture("/Users/quangngoc0811/Downloads/iconPlay.bmp", ren);
     SDL_Texture *exitIcon = loadTexture("/Users/quangngoc0811/Downloads/iconExit.bmp", ren);
     SDL_Texture *snakeIcon = loadTexture("/Users/quangngoc0811/Downloads/snakes.bmp", ren);
+    SDL_Texture *againIcon = loadTexture("/Users/quangngoc0811/Downloads/newgame.bmp", ren);
     int playIconW;
     int playIconH;
     SDL_QueryTexture(playIcon, NULL, NULL, &playIconW, &playIconH);
@@ -289,15 +338,20 @@ void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake) {
     cout << exitIconH << endl;
     cout << positionExitIconX << endl;
     cout << positionExitIconY << endl;
+    int dir = rand()%12;
     while (menuRun && systemRun) {
+        dir = rand()%50;
         renderTexture(ren, menu, 0, 0, SCREENW, SCREENH);
-        renderTexture(ren, playIcon, positionPlayIconX, positionPlayIconY, playIconW, playIconH);
+        if (!playAgain) renderTexture(ren, playIcon, positionPlayIconX, positionPlayIconY, playIconW, playIconH);
+        else renderTexture(ren, againIcon, positionPlayIconX, positionPlayIconY, playIconW, playIconH);
         renderTexture(ren, exitIcon, positionExitIconX, positionExitIconY, exitIconW, exitIconH);
         renderTexture(ren, snakeIcon, positionSnakeIconX, positionSnakeIconY, snakeIconX, snakeIconY);
+        snakeRandomWalk(menuSnake,dir);
         SDL_RenderPresent(ren);
         takeInput(e, snake);
+        SDL_Delay(60);
     }
-    //menuOn= false;
+    menuOn= false;
 
 }
 
@@ -306,4 +360,22 @@ void resetSnake(Snake &snake) {
     snake.head.x = 500;
     snake.head.y = 500;
     snake.direction = "";
+}
+
+void snakeRandomWalk(Snake &snake, int dir) {
+    snake.size = 10;
+    if (dir == 1||dir==9) snake.direction = "UP";
+    if (dir == 2) snake.direction = "DOWN";
+    if (dir == 3|| dir == 8) snake.direction = "LEFT";
+    if (dir == 4) snake.direction = "RIGHT";
+    snake.changeDir();
+    snake.checkOutScreen();
+
+
+    snake.addBody();
+    
+    //SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
+    //SDL_RenderClear(ren);
+
+    snake.printSnake();
 }
