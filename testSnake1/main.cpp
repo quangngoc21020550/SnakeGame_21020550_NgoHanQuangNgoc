@@ -223,7 +223,7 @@ int main(int argc, const char * argv[]) {
     Wall wall(win, ren ,shieldHead, sizeSmallApple);
     vector<Wall> aroundWall;
     Apple smallApple(win, ren, appleSmall,sizeSmallApple, nutriSmallApple);
-    Apple shield(win, ren, shieldHead, sizeSmallApple, nutriSmallApple);
+    Apple shield(win, ren, shieldHead, sizeSmallApple, 0);
     shield.type = "shield";
     deque<SDL_Rect> snake;
     Snake snake1(win, ren, YELLOW_COLOR,snakeHead, direction, true);
