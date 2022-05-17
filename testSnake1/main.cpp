@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <SDL_ttf.h>
 #include <string>
 #include <ctime>
 #include <vector>
@@ -32,6 +33,18 @@ const SDL_Color GREEN_COLOR = {0, 128, 0};
 const SDL_Color DEFAULT_COLOR = BLACK_COLOR;
 int SCREENW = 1400;
 int SCREENH = 700;
+int firstSnakeLocationX = SCREENW/2;
+int firstSnakeLocationY = SCREENH/2;
+int firstAppleLocationX = (SCREENW/40)*10;
+int firstAppleLocationY = (SCREENH/40)*10;
+int firstShieldLocationX = (SCREENW/40)*30;
+int firstShieldLocationY = (SCREENH/40)*30;
+int snakeSize = 10;
+int timeShield = 10000;
+int sizeShield = 10;
+int sizeSmallApple = 10;
+int nutriSmallApple = 30;
+int winCondition = SCREENH*SCREENW/2;
 
 struct Wall {
     SDL_Renderer *renderer;
@@ -78,6 +91,10 @@ struct Apple  {
             SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
             SDL_RenderFillRect(renderer, &location);
         }
+    }
+    void changeLocation() {
+        location.x = ((rand()%SCREENW)/10)*10;
+        location.y = ((rand()%SCREENH)/10)*10;
     }
 };
 struct Snake {
@@ -137,8 +154,7 @@ struct Snake {
                 shield = true;
                 color = BLUE_COLOR;
             }
-            apple.location.x =((rand()%SCREENW)/10)*10;
-            apple.location.y = ((rand()%SCREENH)/10)*10;
+            apple.changeLocation();
             size += apple.nutri;
             return true;
         }
@@ -170,6 +186,13 @@ struct Snake {
             }
         }
     }
+    bool checkWin() {
+        if(size >= winCondition) {
+            SDL_Delay(100);
+            return true;
+        }
+        return  false;
+    }
     void check2v2Lose(Snake snake2) {
         if (!shield) {
             for (int i = 1; i < max(size, snake2.size);i++) {
@@ -190,10 +213,13 @@ void renderTexture(SDL_Renderer* ren, SDL_Texture* tex, int x, int y, int w, int
 void takeInput(SDL_Event &e, Snake &snake);
 void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallApple, Apple &shield, bool &needShield, int &timeShield, Wall wall,vector<Wall> &aroundWall);
 void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake, Snake &menuSnake);
-void resetSnake(Snake &snake);
+void resetSnake(Snake &snake, Apple &apple, bool &needShield);
 void snakeRandomWalk(Snake &snake, int dir);
 void pvpGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Snake &snake2, Apple &smallApple, Apple &shield, bool &needShield, int &timeShield);
-void createWallAround(Wall wall, vector<Wall> &aroundWall);
+void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple& apple, Apple& shield);
+void printResult(SDL_Renderer* &renderer,Snake &snake, string text);
+string getResult(Snake &snake);
+void printPointsOnScreen(SDL_Renderer* ren, Snake &snake);
 
 int main(int argc, const char * argv[]) {
     // Khoi tao chuong trinh
@@ -206,18 +232,7 @@ int main(int argc, const char * argv[]) {
     string playerChoice = "";
     SDL_Event e;
     string direction = "";
-    int firstSnakeLocationX = SCREENW/2;
-    int firstSnakeLocationY = SCREENH/2;
-    int firstAppleLocationX = (SCREENW/40)*10;
-    int firstAppleLocationY = (SCREENH/40)*10;
-    int firstShieldLocationX = (SCREENW/40)*30;
-    int firstShieldLocationY = (SCREENH/40)*30;
-    int snakeSize = 10;
-    int timeShield = 10000;
-    int sizeShield = 10;
     SDL_Rect snakeHead{firstSnakeLocationX,firstSnakeLocationY,snakeSize,snakeSize};
-    int sizeSmallApple = 10;
-    int nutriSmallApple = 30;
     SDL_Rect appleSmall{firstAppleLocationX,firstAppleLocationY,sizeSmallApple,sizeSmallApple};
     SDL_Rect shieldHead{firstShieldLocationX,firstShieldLocationY,sizeShield,sizeShield};
     Wall wall(win, ren ,shieldHead, sizeSmallApple);
@@ -241,8 +256,8 @@ int main(int argc, const char * argv[]) {
     // Tro choi
         //takeInput(e, snake1);
         gameRun = true;
-        resetSnake(snake1);
-        while (gameRun && systemRun) {
+        resetSnake(snake1, smallApple, needShield);
+        while (gameRun && systemRun && !snake1.checkWin()) {
             normalGame(ren, e, snake1, smallApple, shield, needShield, timeShield, wall, aroundWall );
         }
         playAgain = true;
@@ -323,7 +338,7 @@ void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallAppl
     
     
     if(snake1.checkApple(smallApple)) {
-        if(1==1) {
+        if(rand()%3==1) {
             needShield = true;
         }
     }
@@ -337,9 +352,9 @@ void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallAppl
     else {snake1.color = BLUE_COLOR;}
     SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
     SDL_RenderClear(ren);
-
+    printPointsOnScreen(ren, snake1);
     snake1.printSnake();
-    createWallAround(wall, aroundWall );
+    createWallAround(wall, aroundWall ,smallApple, shield);
     
     snake1.checkSeflLose(aroundWall);
     
@@ -388,23 +403,37 @@ void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake, Snake &menuSnake)
     SDL_QueryTexture(snakeIcon, NULL, NULL, &snakeIconX, &snakeIconY);
     int positionSnakeIconX = SCREENW/2 - snakeIconX/2;
     int positionSnakeIconY = SCREENH/3 - snakeIconY/2;
-    cout << playIconW << endl;
-    cout << playIconH << endl;
-    cout << positionPlayIconX << endl;
-    cout << positionPlayIconY << endl;
-    cout << exitIconW << endl;
-    cout << exitIconH << endl;
-    cout << positionExitIconX << endl;
-    cout << positionExitIconY << endl;
     int dir = 0;
+    TTF_Init();
+    string text = getResult(snake);
+    TTF_Font* font = NULL;
+    font = font = TTF_OpenFont("/Users/quangngoc0811/Downloads/Pixeled.ttf", 40);
+    SDL_Surface *surface = NULL;
+    SDL_Texture *texture = NULL;
+    SDL_Color textColor = WHITE_COLOR;
+    surface = TTF_RenderText_Solid(font, text.c_str(), textColor);
+    texture = SDL_CreateTextureFromSurface(ren, surface);
+    SDL_FreeSurface(surface);
+    SDL_Rect srcRest;
+    SDL_Rect desRect;
+    TTF_SizeText(font, text.c_str(), &srcRest.w, &srcRest.h);
+
+    srcRest.x = 0;
+    srcRest.y =  0;
+    desRect.x = SCREENW/2-srcRest.w/2;
+    desRect.y = SCREENH/3-srcRest.h/2;
+
+    desRect.w = srcRest.w;
+    desRect.h = srcRest.h;
     while (menuRun && systemRun) {
         dir = rand()%50;
         renderTexture(ren, menu, 0, 0, SCREENW, SCREENH);
         if (!playAgain) renderTexture(ren, playIcon, positionPlayIconX, positionPlayIconY, playIconW, playIconH);
         else renderTexture(ren, againIcon, positionPlayIconX, positionPlayIconY, playIconW, playIconH);
         renderTexture(ren, exitIcon, positionExitIconX, positionExitIconY, exitIconW, exitIconH);
-        renderTexture(ren, snakeIcon, positionSnakeIconX, positionSnakeIconY, snakeIconX, snakeIconY);
         snakeRandomWalk(menuSnake,dir);
+        if (!playAgain) renderTexture(ren, snakeIcon, positionSnakeIconX, positionSnakeIconY, snakeIconX, snakeIconY);
+        else SDL_RenderCopy(ren, texture, &srcRest, &desRect);
         SDL_RenderPresent(ren);
         takeInput(e, snake);
         SDL_Delay(60);
@@ -413,11 +442,14 @@ void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake, Snake &menuSnake)
 
 }
 
-void resetSnake(Snake &snake) {
+void resetSnake(Snake &snake, Apple& apple, bool &needShield) {
     snake.size = 1;
     snake.head.x = SCREENW/2;
     snake.head.y = SCREENH/2;
     snake.direction = "";
+    apple.location.x = firstAppleLocationX;
+    apple.location.y = firstSnakeLocationY;
+    needShield = false;
 }
 
 void snakeRandomWalk(Snake &snake, int dir) {
@@ -438,66 +470,15 @@ void snakeRandomWalk(Snake &snake, int dir) {
     snake.printSnake();
 }
 
-//void pvpGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Snake &snake2, Apple &smallApple, Apple &shield, bool &needShield, int &timeShield) {
-//    takeInput(e, snake2);
-//    takeInput(e, snake1);
-//
-//
-//
-//
-//    snake1.changeDir();
-//    snake2.changeDir();
-//    snake1.checkOutScreen();
-//    snake2.checkOutScreen();
-//
-//
-//    if(snake1.checkApple(smallApple)) {
-//        if(1==1) {
-//            needShield = true;
-//        }
-//    }
-//    if(snake2.checkApple(smallApple)) {
-//        if(1==1) {
-//            needShield = true;
-//        }
-//    }
-//    if (snake1.checkApple(shield)){
-//        timeShield = 0;
-//        needShield = false;
-//    }
-//    if (snake2.checkApple(shield)){
-//        timeShield = 0;
-//        needShield = false;
-//    }
-//    timeShield++;
-//    snake1.addBody();
-//    snake2.addBody();
-//    if(timeShield > 50) {snake1.shield = false; snake1.color = YELLOW_COLOR;}
-//    else {snake1.color = BLUE_COLOR;}
-//    SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
-//    SDL_RenderClear(ren);
-//
-//    snake1.printSnake();
-//    snake2.printSnake();
-//    snake1.checkSeflLose();
-//    snake1.check2v2Lose(snake2);
-//    snake2.checkSeflLose();
-//    snake2.check2v2Lose(snake1);
-//
-//    //if(needShield) shield.printShield();
-//    smallApple.printApple();
-//
-//    SDL_RenderPresent(ren);
-//    SDL_Delay(30);
-//}
-
-void createWallAround(Wall wall, vector<Wall> &aroundWall) {
+void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& shield) {
 
     for (int i = 0; i < SCREENW; i=i+10) {
         //Wall wall;
         wall.location.x = i;
         wall.location.y = 0;
         aroundWall.push_back(wall);
+        if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+        if(wall.location.x == shield.location.x && wall.location.y == shield.location.y) shield.changeLocation();
         wall.printWall();
     }
     for (int i = 0; i < SCREENW; i=i+10) {
@@ -505,6 +486,7 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall) {
         wall.location.x = i;
         wall.location.y = SCREENH-10;
         aroundWall.push_back(wall);
+        if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
         wall.printWall();
     }
     for (int i = 0; i < SCREENH;i=i+10) {
@@ -512,6 +494,7 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall) {
         wall.location.x = 0;
         wall.location.y = i;
         aroundWall.push_back(wall);
+        if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
         wall.printWall();
     }
     for (int i = 0; i < SCREENH;i=i+10) {
@@ -519,6 +502,41 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall) {
         wall.location.x = SCREENW-10;
         wall.location.y = i;
         aroundWall.push_back(wall);
+        if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
         wall.printWall();
     }
+}
+
+string getResult(Snake &snake) {
+    string result ="";
+    if (!snake.checkWin()) {
+        result = "YOU LOST WITH " + to_string(snake.size-1) + " POINTS! TRY AGAIN!";
+    } else {
+        result = "CONGRATS! YOU ARE THE WINNER!";
+    }
+    return result;
+}
+void printPointsOnScreen(SDL_Renderer* ren, Snake &snake) {
+    TTF_Init();
+    string points = to_string(snake.size-1);
+    TTF_Font* font = NULL;
+    font = font = TTF_OpenFont("/Users/quangngoc0811/Downloads/Pixeled.ttf", 40);
+    SDL_Surface *surface = NULL;
+    SDL_Texture *texture = NULL;
+    SDL_Color textColor = {255, 255, 255, 100};
+    surface = TTF_RenderText_Solid(font, points.c_str(), textColor);
+    texture = SDL_CreateTextureFromSurface(ren, surface);
+    SDL_FreeSurface(surface);
+    SDL_Rect srcRest;
+    SDL_Rect desRect;
+    TTF_SizeText(font,points.c_str(), &srcRest.w, &srcRest.h);
+
+    srcRest.x = 0;
+    srcRest.y =  0;
+    desRect.x = SCREENW/2-srcRest.w/2;
+    desRect.y = SCREENH/3-srcRest.h/2;
+
+    desRect.w = srcRest.w;
+    desRect.h = srcRest.h;
+    SDL_RenderCopy(ren, texture, &srcRest, &desRect);
 }
