@@ -33,16 +33,18 @@ const SDL_Color WHITE_COLOR_FADED = {255, 255, 255, 128};
 const SDL_Color BLACK_COLOR = {0, 0, 0};
 const SDL_Color GREEN_COLOR = {0, 128, 0};
 const SDL_Color DEFAULT_COLOR = BLACK_COLOR;
+const int DEFAULT_SPEED = 40;
 SDL_Color APPLE_COLOR = RED_COLOR;
 SDL_Color SHIELD_COLOR = BLUE_COLOR;
 SDL_Color WALL_COLOR = PURPLE_COLOR;
 string playerChoice = "";
+int gameSpeed = DEFAULT_SPEED;
 int SCREENW = 1400;
 int SCREENH = 700;
 int firstSnakeLocationX = SCREENW/2;
 int firstSnakeLocationY = SCREENH/2;
-int firstAppleLocationX = (SCREENW/40)*10;
-int firstAppleLocationY = (SCREENH/40)*10;
+int firstAppleLocationX = SCREENW/2;
+int firstAppleLocationY = (SCREENH/40)*30;
 int firstShieldLocationX = (SCREENW/40)*30;
 int firstShieldLocationY = (SCREENH/40)*30;
 int snakeSize = 10;
@@ -192,6 +194,9 @@ struct Snake {
             }
         }
     }
+    void increaseSpeed() {
+        if ((size-1)%100==0) gameSpeed--;
+    }
     bool checkWin() {
         if(size >= winCondition) {
             SDL_Delay(100);
@@ -338,7 +343,7 @@ void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallAppl
 
     snake1.changeDir();
     snake1.checkOutScreen();
-    
+    if (snake1.checkApple(smallApple)) snake1.increaseSpeed();
     
     if(snake1.checkApple(smallApple)) {
         if(rand()%3==1) {
@@ -367,7 +372,7 @@ void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallAppl
     smallApple.printApple();
     
     SDL_RenderPresent(ren);
-    SDL_Delay(30);
+    SDL_Delay(gameSpeed);
 
 }
 
@@ -592,4 +597,5 @@ void resetGame(vector<Wall> &aroundWall) {
     menuRun = true;
     modeMenuRun = true;
     aroundWall.erase(aroundWall.begin(), aroundWall.end());
+    gameSpeed = DEFAULT_SPEED;
 }
