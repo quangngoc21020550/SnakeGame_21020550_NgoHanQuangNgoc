@@ -52,7 +52,7 @@ int timeShield = 10000;
 int sizeShield = 10;
 int sizeSmallApple = 10;
 int nutriSmallApple = 5;
-int winCondition = SCREENH*SCREENW/2;
+int winCondition = SCREENW+SCREENH;
 
 struct Wall {
     SDL_Renderer *renderer;
