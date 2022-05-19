@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		9612D371280DB3EE001261D1 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9612D370280DB3EE001261D1 /* main.cpp */; };
 		9612D379280DB3FD001261D1 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9612D378280DB3FD001261D1 /* SDL2.framework */; };
+		9633FD8F28362F9600C7872F /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9633FD8E28362F9600C7872F /* SDL2_ttf.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,6 +28,7 @@
 		9612D36D280DB3EE001261D1 /* testSnake1 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testSnake1; sourceTree = BUILT_PRODUCTS_DIR; };
 		9612D370280DB3EE001261D1 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		9612D378280DB3FD001261D1 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../../Library/Frameworks/SDL2.framework; sourceTree = "<group>"; };
+		9633FD8E28362F9600C7872F /* SDL2_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_ttf.framework; path = ../../../../Library/Frameworks/SDL2_ttf.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -34,6 +36,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9633FD8F28362F9600C7872F /* SDL2_ttf.framework in Frameworks */,
 				9612D379280DB3FD001261D1 /* SDL2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -69,6 +72,7 @@
 		9612D377280DB3FD001261D1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9633FD8E28362F9600C7872F /* SDL2_ttf.framework */,
 				9612D378280DB3FD001261D1 /* SDL2.framework */,
 			);
 			name = Frameworks;
@@ -255,6 +259,7 @@
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
 				);
+				HEADER_SEARCH_PATHS = /Library/Frameworks/SDL2_ttf.framework/Versions/A/Headers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -267,6 +272,7 @@
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
 				);
+				HEADER_SEARCH_PATHS = /Library/Frameworks/SDL2_ttf.framework/Versions/A/Headers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

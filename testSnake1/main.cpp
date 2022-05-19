@@ -15,10 +15,11 @@
 
 using namespace std;
 
+const string WINDOW_TITLE = "SNAKE GAME";
 bool systemRun = true;
 bool menuRun = true;
 bool gameRun = true;
-bool menuOn = true;
+bool modeMenuRun = false;
 bool playAgain = false;
 const SDL_Color CYAN_COLOR = {0, 255, 255};
 const SDL_Color BLUE_COLOR = {0, 0, 255};
@@ -27,10 +28,15 @@ const SDL_Color YELLOW_COLOR = {255, 255, 0};
 const SDL_Color LIME_COLOR = {0, 255, 0};
 const SDL_Color PURPLE_COLOR = {128, 0, 128};
 const SDL_Color RED_COLOR = {255, 0, 0};
-const SDL_Color WHITE_COLOR = {255, 255, 255};
+const SDL_Color WHITE_COLOR = {255, 255, 255, 255};
+const SDL_Color WHITE_COLOR_FADED = {255, 255, 255, 128};
 const SDL_Color BLACK_COLOR = {0, 0, 0};
 const SDL_Color GREEN_COLOR = {0, 128, 0};
 const SDL_Color DEFAULT_COLOR = BLACK_COLOR;
+SDL_Color APPLE_COLOR = RED_COLOR;
+SDL_Color SHIELD_COLOR = BLUE_COLOR;
+SDL_Color WALL_COLOR = PURPLE_COLOR;
+string playerChoice = "";
 int SCREENW = 1400;
 int SCREENH = 700;
 int firstSnakeLocationX = SCREENW/2;
@@ -43,7 +49,7 @@ int snakeSize = 10;
 int timeShield = 10000;
 int sizeShield = 10;
 int sizeSmallApple = 10;
-int nutriSmallApple = 30;
+int nutriSmallApple = 5;
 int winCondition = SCREENH*SCREENW/2;
 
 struct Wall {
@@ -59,7 +65,7 @@ struct Wall {
         size = _size;
     };
     void printWall() {
-        SDL_SetRenderDrawColor(renderer,0, 255, 0, 255);
+        SDL_SetRenderDrawColor(renderer,0, WALL_COLOR.r, WALL_COLOR.g, WALL_COLOR.b);
         SDL_RenderFillRect(renderer, &location);
     }
     
@@ -83,12 +89,12 @@ struct Apple  {
         nutri = _nutri;
     }
     void printApple() {
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, APPLE_COLOR.r, APPLE_COLOR.g, APPLE_COLOR.b, 255);
         SDL_RenderFillRect(renderer, &location);
     }
     void printShield() {
         if (type == "shield") {
-            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            SDL_SetRenderDrawColor(renderer, SHIELD_COLOR.r, SHIELD_COLOR.g, SHIELD_COLOR.b, 255);
             SDL_RenderFillRect(renderer, &location);
         }
     }
@@ -172,7 +178,7 @@ struct Snake {
         }
     }
 
-    void checkSeflLose(vector<Wall> aroundWall){
+    void checkSeflLose(vector<Wall> &aroundWall){
         if (!shield) {
             for (int i = 1 ; i < size;i++) {
                 if (head.x == fullBody[i].x && head.y == fullBody[i].y){
@@ -207,7 +213,6 @@ struct Snake {
 void logErr(string mess, bool err = false);
 void initSDL(SDL_Window* &win, SDL_Renderer* &ren);
 void quitSDL(SDL_Window* win, SDL_Renderer* ren);
-void closePrg(int &dir, bool &run , SDL_Event e);
 SDL_Texture *loadTexture(string fileName, SDL_Renderer *ren);
 void renderTexture(SDL_Renderer* ren, SDL_Texture* tex, int x, int y, int w, int h);
 void takeInput(SDL_Event &e, Snake &snake);
@@ -220,6 +225,9 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple& apple, Apple& 
 void printResult(SDL_Renderer* &renderer,Snake &snake, string text);
 string getResult(Snake &snake);
 void printPointsOnScreen(SDL_Renderer* ren, Snake &snake);
+void displayGameMode(SDL_Renderer* ren, SDL_Event &e, Snake &snake);
+void printText(SDL_Renderer* ren, string text, SDL_Color textColor, int fontSize, int ratioX, int ratioY);
+void resetGame(vector<Wall> &aroundWall);
 
 int main(int argc, const char * argv[]) {
     // Khoi tao chuong trinh
@@ -229,7 +237,7 @@ int main(int argc, const char * argv[]) {
     SDL_Renderer *ren = NULL;
     initSDL(win, ren);
     //Khoi tao cac bien tro choi
-    string playerChoice = "";
+    
     SDL_Event e;
     string direction = "";
     SDL_Rect snakeHead{firstSnakeLocationX,firstSnakeLocationY,snakeSize,snakeSize};
@@ -241,34 +249,31 @@ int main(int argc, const char * argv[]) {
     Apple shield(win, ren, shieldHead, sizeSmallApple, 0);
     shield.type = "shield";
     deque<SDL_Rect> snake;
-    Snake snake1(win, ren, YELLOW_COLOR,snakeHead, direction, true);
+    Snake snake1(win, ren, YELLOW_COLOR,snakeHead, direction,true);
     snake1.player = 2;
-
     Snake menuSnake(win, ren, GREEN_COLOR, snakeHead, direction);
     bool needShield = false;
     //System run
     
     while (systemRun) {
     // Menu
-        //menuOn = true;
-        if(menuOn&&!playAgain) displayMenu(ren,e,snake1, menuSnake);
+        displayMenu(ren, e, snake1, menuSnake);
+    // ChoseGameMode
+        displayGameMode(ren,e,snake1);
+        
 
     // Tro choi
-        //takeInput(e, snake1);
+        
         gameRun = true;
         resetSnake(snake1, smallApple, needShield);
         while (gameRun && systemRun && !snake1.checkWin()) {
             normalGame(ren, e, snake1, smallApple, shield, needShield, timeShield, wall, aroundWall );
         }
-        playAgain = true;
-        menuRun = true;
-        menuOn = true;
-        if(menuOn) displayMenu(ren, e, snake1, menuSnake);
+        
+        resetGame(aroundWall);
     }
     // Ket thuc
     
-    
-    //SDL_RenderPresent(ren);
     quitSDL(win, ren);
 }
 
@@ -283,7 +288,7 @@ void initSDL(SDL_Window* &win, SDL_Renderer* &ren) {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         logErr("INIT ", true);
     }
-    win = SDL_CreateWindow("TEST PAINT", 0, 0, SCREENW, SCREENH, SDL_WINDOW_SHOWN);
+    win = SDL_CreateWindow("SNAKE GAME", 0, 0, SCREENW, SCREENH, SDL_WINDOW_SHOWN);
     if (win == nullptr) logErr("WIN ", true);
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED |
                              SDL_RENDERER_PRESENTVSYNC);
@@ -294,23 +299,10 @@ void initSDL(SDL_Window* &win, SDL_Renderer* &ren) {
 void quitSDL(SDL_Window* win, SDL_Renderer* ren) {
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
+    TTF_Quit();
     SDL_Quit();
 }
 
-void closePrg(int &dir, bool &run, SDL_Event e) {
-    while (SDL_PollEvent(&e)) {
-        if (e.type == SDL_QUIT) {
-        gameRun = false;
-    }
-        if (e.type == SDL_KEYDOWN) {
-            if (e.key.keysym.sym == SDLK_UP && dir !=2 ) dir = 1;
-            if (e.key.keysym.sym == SDLK_DOWN && dir != 1) dir = 2;
-            if (e.key.keysym.sym == SDLK_LEFT && dir != 4) dir = 3;
-            if (e.key.keysym.sym == SDLK_RIGHT && dir !=3) dir = 4;
-            
-        }
-    }
-}
 void takeInput(SDL_Event &e, Snake &snake) {
     while (SDL_PollEvent(&e)) {
         if (e.type == SDL_QUIT) {
@@ -320,11 +312,22 @@ void takeInput(SDL_Event &e, Snake &snake) {
             snake.analyzeInput(e);
         }
         if (e.type == SDL_MOUSEBUTTONDOWN) {
-            if (e.button.x >= 540 && e.button.y > 434 && e.button.x <= 540+320 && e.button.y <= 434+65 && menuOn)
+            if (e.button.x >= 540 && e.button.y >= 434 && e.button.x <= 540+320 && e.button.y <= 434+65 && menuRun)
                 menuRun = false;
-            if (e.button.x >= 540 && e.button.y > 529 && e.button.x <= 540+320 && e.button.y <= 529+63 && menuOn) {
-                //menuRun = false;
+            if (e.button.x >= 540 && e.button.y >= 529 && e.button.x <= 540+320 && e.button.y <= 529+63 && menuRun) {
                 systemRun = false;
+            }
+            if (e.button.x >= 235 && e.button.y >= 417 && e.button.x <= 235+231 && e.button.y <= 417+98 && modeMenuRun) {
+                playerChoice = "No Wall";
+                modeMenuRun = false;
+            }
+            if (e.button.x >= 623 && e.button.y >= 417 && e.button.x <= 623+154 && e.button.y <= 417+98 && modeMenuRun) {
+                playerChoice = "Basic Wall";
+                modeMenuRun = false;
+            }
+            if (e.button.x >= 924 && e.button.y >= 417 && e.button.x <= 924+252 && e.button.y <= 417+98 && modeMenuRun) {
+                playerChoice = "Advanced Wall";
+                modeMenuRun= false;
             }
         }
     }
@@ -350,12 +353,14 @@ void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallAppl
     snake1.addBody();
     if(timeShield > 50) {snake1.shield = false; snake1.color = YELLOW_COLOR;}
     else {snake1.color = BLUE_COLOR;}
-    SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(ren, DEFAULT_COLOR.r, DEFAULT_COLOR.g, DEFAULT_COLOR.b, 0);
     SDL_RenderClear(ren);
-    printPointsOnScreen(ren, snake1);
-    snake1.printSnake();
-    createWallAround(wall, aroundWall ,smallApple, shield);
     
+    snake1.printSnake();
+    printText(ren, to_string(snake1.size-1) + "/" +to_string(winCondition), WHITE_COLOR_FADED,40,SCREENW/2,SCREENH/4);
+    if(playerChoice != "No Wall") {
+        createWallAround(wall, aroundWall ,smallApple, shield);
+    }
     snake1.checkSeflLose(aroundWall);
     
     if(needShield) shield.printShield();
@@ -404,27 +409,7 @@ void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake, Snake &menuSnake)
     int positionSnakeIconX = SCREENW/2 - snakeIconX/2;
     int positionSnakeIconY = SCREENH/3 - snakeIconY/2;
     int dir = 0;
-    TTF_Init();
     string text = getResult(snake);
-    TTF_Font* font = NULL;
-    font = font = TTF_OpenFont("/Users/quangngoc0811/Downloads/Pixeled.ttf", 40);
-    SDL_Surface *surface = NULL;
-    SDL_Texture *texture = NULL;
-    SDL_Color textColor = WHITE_COLOR;
-    surface = TTF_RenderText_Solid(font, text.c_str(), textColor);
-    texture = SDL_CreateTextureFromSurface(ren, surface);
-    SDL_FreeSurface(surface);
-    SDL_Rect srcRest;
-    SDL_Rect desRect;
-    TTF_SizeText(font, text.c_str(), &srcRest.w, &srcRest.h);
-
-    srcRest.x = 0;
-    srcRest.y =  0;
-    desRect.x = SCREENW/2-srcRest.w/2;
-    desRect.y = SCREENH/3-srcRest.h/2;
-
-    desRect.w = srcRest.w;
-    desRect.h = srcRest.h;
     while (menuRun && systemRun) {
         dir = rand()%50;
         renderTexture(ren, menu, 0, 0, SCREENW, SCREENH);
@@ -433,12 +418,12 @@ void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake, Snake &menuSnake)
         renderTexture(ren, exitIcon, positionExitIconX, positionExitIconY, exitIconW, exitIconH);
         snakeRandomWalk(menuSnake,dir);
         if (!playAgain) renderTexture(ren, snakeIcon, positionSnakeIconX, positionSnakeIconY, snakeIconX, snakeIconY);
-        else SDL_RenderCopy(ren, texture, &srcRest, &desRect);
+        else printText(ren, text, WHITE_COLOR,40,SCREENW/2,SCREENH/3);
         SDL_RenderPresent(ren);
         takeInput(e, snake);
         SDL_Delay(60);
     }
-    menuOn= false;
+    modeMenuRun = true;
 
 }
 
@@ -448,7 +433,7 @@ void resetSnake(Snake &snake, Apple& apple, bool &needShield) {
     snake.head.y = SCREENH/2;
     snake.direction = "";
     apple.location.x = firstAppleLocationX;
-    apple.location.y = firstSnakeLocationY;
+    apple.location.y = firstAppleLocationY;
     needShield = false;
 }
 
@@ -463,9 +448,6 @@ void snakeRandomWalk(Snake &snake, int dir) {
 
 
     snake.addBody();
-    
-    //SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
-    //SDL_RenderClear(ren);
 
     snake.printSnake();
 }
@@ -473,7 +455,6 @@ void snakeRandomWalk(Snake &snake, int dir) {
 void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& shield) {
 
     for (int i = 0; i < SCREENW; i=i+10) {
-        //Wall wall;
         wall.location.x = i;
         wall.location.y = 0;
         aroundWall.push_back(wall);
@@ -482,7 +463,6 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& 
         wall.printWall();
     }
     for (int i = 0; i < SCREENW; i=i+10) {
-        //Wall wall;
         wall.location.x = i;
         wall.location.y = SCREENH-10;
         aroundWall.push_back(wall);
@@ -490,7 +470,6 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& 
         wall.printWall();
     }
     for (int i = 0; i < SCREENH;i=i+10) {
-        //Wall wall;
         wall.location.x = 0;
         wall.location.y = i;
         aroundWall.push_back(wall);
@@ -498,12 +477,41 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& 
         wall.printWall();
     }
     for (int i = 0; i < SCREENH;i=i+10) {
-        //Wall wall;
         wall.location.x = SCREENW-10;
         wall.location.y = i;
         aroundWall.push_back(wall);
         if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
         wall.printWall();
+    }
+    if(playerChoice == "Advanced Wall") {
+        for (int i = 0; i < 50; i = i+10) {
+            wall.location.x = (SCREENW/40)*10;
+            wall.location.y = i +(SCREENH/40)*10;
+            aroundWall.push_back(wall);
+            if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+            wall.printWall();
+        }
+        for (int i = 0; i < 50; i = i+10) {
+            wall.location.x = (SCREENW/40)*30;
+            wall.location.y = i +(SCREENH/40)*10;
+            aroundWall.push_back(wall);
+            if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+            wall.printWall();
+        }
+        for (int i = 0; i < 50; i = i+10) {
+            wall.location.x = (SCREENW/40)*10;
+            wall.location.y = (SCREENH/40)*30 - i;
+            aroundWall.push_back(wall);
+            if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+            wall.printWall();
+        }
+        for (int i = 0; i < 50; i = i+10) {
+            wall.location.x = (SCREENW/40)*30;
+            wall.location.y = (SCREENH/40)*30-i;
+            aroundWall.push_back(wall);
+            if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+            wall.printWall();
+        }
     }
 }
 
@@ -539,4 +547,49 @@ void printPointsOnScreen(SDL_Renderer* ren, Snake &snake) {
     desRect.w = srcRest.w;
     desRect.h = srcRest.h;
     SDL_RenderCopy(ren, texture, &srcRest, &desRect);
+}
+
+void displayGameMode(SDL_Renderer* ren, SDL_Event &e, Snake &snake) {
+    while (modeMenuRun && systemRun) {
+        SDL_SetRenderDrawColor(ren, DEFAULT_COLOR.r, DEFAULT_COLOR.g, DEFAULT_COLOR.b, 0);
+        SDL_RenderClear(ren);
+        printText(ren, "CHOOSE WALL MODE", WHITE_COLOR, 40, SCREENW/2, SCREENH/3);
+        printText(ren,  "NO WALL", WHITE_COLOR, 35, SCREENW/4, 2*SCREENH/3);
+        printText(ren,  "BASIC", WHITE_COLOR, 35, SCREENW/2, 2*SCREENH/3);
+        printText(ren,  "ADVANCE", WHITE_COLOR, 35, 3*SCREENW/4, 2*SCREENH/3);
+        takeInput(e, snake);
+        SDL_RenderPresent(ren);
+        SDL_Delay(60);
+    }
+    
+}
+void printText(SDL_Renderer *ren, string text, SDL_Color textColor, int fontSize, int ratioX, int ratioY) {
+    TTF_Init();
+    TTF_Font* font = NULL;
+    font = font = TTF_OpenFont("/Users/quangngoc0811/Downloads/Pixeled.ttf", fontSize);
+    SDL_Surface *surface = NULL;
+    SDL_Texture *texture = NULL;
+    //SDL_Color textColor = {255, 255, 255, 100};
+    surface = TTF_RenderText_Solid(font, text.c_str(), textColor);
+    texture = SDL_CreateTextureFromSurface(ren, surface);
+    SDL_FreeSurface(surface);
+    SDL_Rect srcRest;
+    SDL_Rect desRect;
+    TTF_SizeText(font,text.c_str(), &srcRest.w, &srcRest.h);
+
+    srcRest.x = 0;
+    srcRest.y =  0;
+    desRect.x = ratioX-srcRest.w/2;
+    desRect.y = ratioY-srcRest.h/2;
+    desRect.w = srcRest.w;
+    desRect.h = srcRest.h;
+    SDL_RenderCopy(ren, texture, &srcRest, &desRect);
+}
+
+void resetGame(vector<Wall> &aroundWall) {
+    playerChoice = "";
+    playAgain = true;
+    menuRun = true;
+    modeMenuRun = true;
+    aroundWall.erase(aroundWall.begin(), aroundWall.end());
 }
