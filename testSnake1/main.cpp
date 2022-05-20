@@ -318,19 +318,25 @@ void takeInput(SDL_Event &e, Snake &snake) {
             snake.analyzeInput(e);
         }
         if (e.type == SDL_MOUSEBUTTONDOWN) {
-            if (e.button.x >= 540 && e.button.y >= 434 && e.button.x <= 540+320 && e.button.y <= 434+65 && menuRun)
+            // Toa do nut StartGame
+            if (e.button.x >= 540 && e.button.y >= 434 && e.button.x <= 540+320 && e.button.y <= 434+65 && menuRun){
                 menuRun = false;
+            }
+            // Toa do nut Exit
             if (e.button.x >= 540 && e.button.y >= 529 && e.button.x <= 540+320 && e.button.y <= 529+63 && menuRun) {
                 systemRun = false;
             }
+            // Toa do nut No Wall
             if (e.button.x >= 235 && e.button.y >= 417 && e.button.x <= 235+231 && e.button.y <= 417+98 && modeMenuRun) {
                 playerChoice = "No Wall";
                 modeMenuRun = false;
             }
+            // Toa do nut Basic Wall
             if (e.button.x >= 623 && e.button.y >= 417 && e.button.x <= 623+154 && e.button.y <= 417+98 && modeMenuRun) {
                 playerChoice = "Basic Wall";
                 modeMenuRun = false;
             }
+            // Toa do nut Advanced Wall
             if (e.button.x >= 924 && e.button.y >= 417 && e.button.x <= 924+252 && e.button.y <= 417+98 && modeMenuRun) {
                 playerChoice = "Advanced Wall";
                 modeMenuRun= false;
@@ -344,10 +350,9 @@ void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallAppl
 
     snake1.changeDir();
     snake1.checkOutScreen();
-    //if (snake1.checkApple(smallApple))
-    
+
     if(snake1.checkApple(smallApple)) {
-        if(1==1) {
+        if(rand()%3==1) {
             needShield = true;
         }
         snake1.increaseSpeed();
