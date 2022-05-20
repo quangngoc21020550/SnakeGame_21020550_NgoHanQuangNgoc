@@ -2,7 +2,9 @@
 Final Project INT2215 1
 
 IDE sử dụng: XCode 13.3.
+
 Thiết bị sử dụng: Macbook pro M1 pro 2021.
+
 I. Cài đặt chương trình 
 1. Tải Xcode 13.3, tải GithubDesktop và chỉnh ứng dụng mặc định thành Xcode. 
 2. Trong GithubDesktop, clone url: https://github.com/quangngoc21020550/SnakeGame_21020550_NgoHanQuangNgoc.git và click vào Open in Xcode. 
@@ -28,10 +30,10 @@ Link Youtube: https://youtu.be/VuVIF7Zuxyw
 Link Youtube:https://youtu.be/wFqCsqqwGig
 
 IV. Các kỹ thuật được sử dụng trong lập trình
-Mảng: Chương trình Snake game đã sử dụng các mảng động: deque và vector. Và không sử dụng mảng tĩnh array. Deque trong chương trình có tác dụng thêm liên tục các phần tử snake, để hiển thị rắn ra khỏi màn hình cũng như kiểm tra khi nào rắn tự đâm đầu vào đuôi của mình. Lý do dùng deque thay vì vector là vì deque co thể thêm phần tử vào vị trí đầu tiên thay vì chỉ cuối cùng như vector. Vector trong chương trình được sử dụng để chứa các phần tử tường, nhằm kiểm tra khi nào rắn đâm vào tường.
-Cấu trúc (Struct): Struct đóng vai trò quan trọng trong việc nâng cấp chương trình trong tương lai, khi sử dụng struct hay class, ngoài tác dụng khiến code gọn, dễ hiểu hơn, thì ta có thể tạo ra các chế độ nhiều người chơi, tạo ra nhiều loại con mồi (trong game đã có táo và lá chắn).
-Con trỏ: Con trỏ được sử dụng đa phần trong hai hàm khỏi tạo cửa sổ: initSDL và quitSDL. Đa phần các hàm và phương thức trong bài sử dụng biến tham số. Em lựa chọn biến tham số vì nó có thể giúp chương trình tiết kiệm bộ nhớ và dễ sử dụng hơn nhiều so với biến con trỏ.
-Đồ họa: Đồ họa của game theo phong cách pixel tối giản. Nên không có những thuật toán nâng cao của đồ họa. Những gì em sử dụng trong bài đơn giản là tô màu, vẽ các phần tử SDL_Rect và hiển thị ảnh bitmap.
+1. Mảng: Chương trình Snake game đã sử dụng các mảng động: deque và vector. Và không sử dụng mảng tĩnh array. Deque trong chương trình có tác dụng thêm liên tục các phần tử snake, để hiển thị rắn ra khỏi màn hình cũng như kiểm tra khi nào rắn tự đâm đầu vào đuôi của mình. Lý do dùng deque thay vì vector là vì deque co thể thêm phần tử vào vị trí đầu tiên thay vì chỉ cuối cùng như vector. Vector trong chương trình được sử dụng để chứa các phần tử tường, nhằm kiểm tra khi nào rắn đâm vào tường.
+2. Cấu trúc (Struct): Struct đóng vai trò quan trọng trong việc nâng cấp chương trình trong tương lai, khi sử dụng struct hay class, ngoài tác dụng khiến code gọn, dễ hiểu hơn, thì ta có thể tạo ra các chế độ nhiều người chơi, tạo ra nhiều loại con mồi (trong game đã có táo và lá chắn).
+3. Con trỏ: Con trỏ được sử dụng đa phần trong hai hàm khỏi tạo cửa sổ: initSDL và quitSDL. Đa phần các hàm và phương thức trong bài sử dụng biến tham số. Em lựa chọn biến tham số vì nó có thể giúp chương trình tiết kiệm bộ nhớ và dễ sử dụng hơn nhiều so với biến con trỏ.
+4. Đồ họa: Đồ họa của game theo phong cách pixel tối giản. Nên không có những thuật toán nâng cao của đồ họa. Những gì em sử dụng trong bài đơn giản là tô màu, vẽ các phần tử SDL_Rect và hiển thị ảnh bitmap.
 
 V. Kết luận, hướng phát triển và các điều tâm đắc rút ra được
 1. Kết luận
