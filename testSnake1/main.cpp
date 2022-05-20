@@ -51,7 +51,7 @@ int snakeSize = 10;
 int sizeShield = 10;
 int sizeSmallApple = 10;
 int nutriSmallApple = 5;
-int winCondition = SCREENW+SCREENH;
+int winCondition = SCREENH+SCREENW;
 int increaseSpeedRate = 100;
 
 struct Wall {
