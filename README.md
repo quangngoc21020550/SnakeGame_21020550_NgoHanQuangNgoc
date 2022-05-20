@@ -4,9 +4,8 @@ Final Project INT2215 1
   IDE sử dụng: XCode 13.3.
   Thiết bị sử dụng: Macbook pro M1 pro 2021.
   I. Cài đặt chương trình 
-B1: Tải Xcode 13.3, tải GithubDesktop và chỉnh ứng dụng mặc định thành Xcode.
-B2: Trong GithubDesktop, clone url: https://github.com/quangngoc21020550/SnakeGame_21020550_NgoHanQuangNgoc.git và click vào Open in Xcode.
-
+B1: Tải Xcode 13.3, tải GithubDesktop và chỉnh ứng dụng mặc định thành Xcode. /n
+B2: Trong GithubDesktop, clone url: https://github.com/quangngoc21020550/SnakeGame_21020550_NgoHanQuangNgoc.git và click vào Open in Xcode. /n
 B3: Cài đặt SDL tại https://www.libsdl.org/download-2.0.php#source, SDL_ttf tại https://www.libsdl.org/projects/SDL_ttf/release/ (tải file có tên "SDL2_ttf-2.0.18.dmg";và add vào frameworks của máy như hướng dẫn trong link https://lazyfoo.net/tutorials/SDL/01_hello_SDL/mac/index.php (làm y hệt tương tự với SDL_ttf).
 B4: Link SDL với code: 
 B5: Bấm Run hoặc Cmd+R để chạy chương trình (chương trình hiện Run Succeed nghĩa là đã thành công).
