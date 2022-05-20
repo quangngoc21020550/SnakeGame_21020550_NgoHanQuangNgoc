@@ -53,6 +53,7 @@ int sizeShield = 10;
 int sizeSmallApple = 10;
 int nutriSmallApple = 5;
 int winCondition = SCREENW+SCREENH;
+int increaseSpeedRate = 100;
 
 struct Wall {
     SDL_Renderer *renderer;
@@ -195,7 +196,7 @@ struct Snake {
         }
     }
     void increaseSpeed() {
-        if ((size-1)%100==0) gameSpeed--;
+        if ((size-1)%increaseSpeedRate==0) gameSpeed--;
     }
     bool checkWin() {
         if(size >= winCondition) {
@@ -229,7 +230,7 @@ void pvpGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Snake &snake2, Appl
 void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple& apple, Apple& shield);
 void printResult(SDL_Renderer* &renderer,Snake &snake, string text);
 string getResult(Snake &snake);
-void printPointsOnScreen(SDL_Renderer* ren, Snake &snake);
+//void printPointsOnScreen(SDL_Renderer* ren, Snake &snake);
 void displayGameMode(SDL_Renderer* ren, SDL_Event &e, Snake &snake);
 void printText(SDL_Renderer* ren, string text, SDL_Color textColor, int fontSize, int ratioX, int ratioY);
 void resetGame(vector<Wall> &aroundWall);
@@ -394,7 +395,7 @@ void renderTexture(SDL_Renderer* ren, SDL_Texture* tex, int x, int y, int w, int
 }
 
 void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake, Snake &menuSnake) {
-    SDL_Texture *menu = loadTexture("/Users/quangngoc0811/Downloads/blackbg.bmp", ren);
+    //SDL_Texture *menu = loadTexture("/Users/quangngoc0811/Downloads/blackbg.bmp", ren);
     SDL_Texture *playIcon = loadTexture("/Users/quangngoc0811/Downloads/iconPlay.bmp", ren);
     SDL_Texture *exitIcon = loadTexture("/Users/quangngoc0811/Downloads/iconExit.bmp", ren);
     SDL_Texture *snakeIcon = loadTexture("/Users/quangngoc0811/Downloads/snakes.bmp", ren);
@@ -417,7 +418,9 @@ void displayMenu(SDL_Renderer *ren,SDL_Event &e, Snake &snake, Snake &menuSnake)
     string text = getResult(snake);
     while (menuRun && systemRun) {
         dir = rand()%50;
-        renderTexture(ren, menu, 0, 0, SCREENW, SCREENH);
+        //renderTexture(ren, menu, 0, 0, SCREENW, SCREENH);
+        SDL_SetRenderDrawColor(ren, DEFAULT_COLOR.r, DEFAULT_COLOR.g, DEFAULT_COLOR.b, 0);
+        SDL_RenderClear(ren);
         if (!playAgain) renderTexture(ren, playIcon, positionPlayIconX, positionPlayIconY, playIconW, playIconH);
         else renderTexture(ren, againIcon, positionPlayIconX, positionPlayIconY, playIconW, playIconH);
         renderTexture(ren, exitIcon, positionExitIconX, positionExitIconY, exitIconW, exitIconH);
@@ -529,30 +532,30 @@ string getResult(Snake &snake) {
     }
     return result;
 }
-void printPointsOnScreen(SDL_Renderer* ren, Snake &snake) {
-    TTF_Init();
-    string points = to_string(snake.size-1);
-    TTF_Font* font = NULL;
-    font = font = TTF_OpenFont("/Users/quangngoc0811/Downloads/Pixeled.ttf", 40);
-    SDL_Surface *surface = NULL;
-    SDL_Texture *texture = NULL;
-    SDL_Color textColor = {255, 255, 255, 100};
-    surface = TTF_RenderText_Solid(font, points.c_str(), textColor);
-    texture = SDL_CreateTextureFromSurface(ren, surface);
-    SDL_FreeSurface(surface);
-    SDL_Rect srcRest;
-    SDL_Rect desRect;
-    TTF_SizeText(font,points.c_str(), &srcRest.w, &srcRest.h);
-
-    srcRest.x = 0;
-    srcRest.y =  0;
-    desRect.x = SCREENW/2-srcRest.w/2;
-    desRect.y = SCREENH/3-srcRest.h/2;
-
-    desRect.w = srcRest.w;
-    desRect.h = srcRest.h;
-    SDL_RenderCopy(ren, texture, &srcRest, &desRect);
-}
+//void printPointsOnScreen(SDL_Renderer* ren, Snake &snake) {
+//    TTF_Init();
+//    string points = to_string(snake.size-1);
+//    TTF_Font* font = NULL;
+//    font = font = TTF_OpenFont("/Users/quangngoc0811/Downloads/Pixeled.ttf", 40);
+//    SDL_Surface *surface = NULL;
+//    SDL_Texture *texture = NULL;
+//    SDL_Color textColor = {255, 255, 255, 100};
+//    surface = TTF_RenderText_Solid(font, points.c_str(), textColor);
+//    texture = SDL_CreateTextureFromSurface(ren, surface);
+//    SDL_FreeSurface(surface);
+//    SDL_Rect srcRest;
+//    SDL_Rect desRect;
+//    TTF_SizeText(font,points.c_str(), &srcRest.w, &srcRest.h);
+//
+//    srcRest.x = 0;
+//    srcRest.y =  0;
+//    desRect.x = SCREENW/2-srcRest.w/2;
+//    desRect.y = SCREENH/3-srcRest.h/2;
+//
+//    desRect.w = srcRest.w;
+//    desRect.h = srcRest.h;
+//    SDL_RenderCopy(ren, texture, &srcRest, &desRect);
+//}
 
 void displayGameMode(SDL_Renderer* ren, SDL_Event &e, Snake &snake) {
     while (modeMenuRun && systemRun) {
