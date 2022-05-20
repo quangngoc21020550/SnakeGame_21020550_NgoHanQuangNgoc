@@ -48,7 +48,6 @@ int firstAppleLocationY = (SCREENH/40)*30;
 int firstShieldLocationX = (SCREENW/40)*30;
 int firstShieldLocationY = (SCREENH/40)*30;
 int snakeSize = 10;
-int timeShield = 10000;
 int sizeShield = 10;
 int sizeSmallApple = 10;
 int nutriSmallApple = 5;
@@ -258,6 +257,7 @@ int main(int argc, const char * argv[]) {
     Snake snake1(win, ren, YELLOW_COLOR,snakeHead, direction,true);
     snake1.player = 2;
     Snake menuSnake(win, ren, GREEN_COLOR, snakeHead, direction);
+    int timeShield = 10000;
     bool needShield = false;
     //System run
     
@@ -339,17 +339,18 @@ void takeInput(SDL_Event &e, Snake &snake) {
     }
 }
 void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallApple, Apple &shield, bool &needShield, int &timeShield, Wall wall,vector<Wall> &aroundWall) {
-    takeInput(e, snake1 );
+    takeInput(e, snake1);
     
 
     snake1.changeDir();
     snake1.checkOutScreen();
-    if (snake1.checkApple(smallApple)) snake1.increaseSpeed();
+    //if (snake1.checkApple(smallApple))
     
     if(snake1.checkApple(smallApple)) {
-        if(rand()%3==1) {
+        if(1==1) {
             needShield = true;
         }
+        snake1.increaseSpeed();
     }
     if (snake1.checkApple(shield)){
         timeShield = 0;
@@ -371,7 +372,6 @@ void normalGame(SDL_Renderer *ren, SDL_Event &e, Snake &snake1, Apple &smallAppl
     
     if(needShield) shield.printShield();
     smallApple.printApple();
-    
     SDL_RenderPresent(ren);
     SDL_Delay(gameSpeed);
 
