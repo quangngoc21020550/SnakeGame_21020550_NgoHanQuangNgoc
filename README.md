@@ -13,3 +13,6 @@ B5: Bấm Run hoặc Cmd+R để chạy chương trình (chương trình hiện 
 II. Mô tả chung về trò chơi
 Trò chơi tên Snake Game, được lấy cảm hứng chính từ trò chơi con rắn cổ điển, xây dựng theo phong cách đồ họa pixel và bổ sung thêm một số tính năng: Tường chặn, chọn chế độ tường chặn, ăn lá chắn giúp bất tử một thời gian, tính điểm, tăng tốc độ khi điểm tăng.
 
+III. Mô tả chi tiết các tính năng
+1. Những tính năng cơ bản của trò chơi con rắn cổ điển(tăng độ dài rắn khi ăn táo, khi đi ra khỏi màn hình thì xuất hiện ở đầu bên kia, thua khi đầu chạm vào đuôi)
+Link Youtube:
