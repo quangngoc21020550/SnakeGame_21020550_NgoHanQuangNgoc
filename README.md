@@ -13,6 +13,7 @@ I. Cài đặt chương trình.
 5. Link SDL với code: https://youtu.be/gDTlVV9hgtk.
 6. Bấm Run hoặc Cmd+R để chạy chương trình (chương trình hiện Run Succeed nghĩa là đã thành công).
 7. Lưu ý quan trọng khi chạy chương trình: https://youtu.be/Ovy8_nQbE-w. (Do kênh Youtube kia bị quá giới hạn upload video nên em dùng kênh Youtube khác ạ).
+8. Sau khi đã vào màn hình game, chọn "START!", chọn chế độ chơi, và điều hướng rắn bằng các nút mũi tên trên bàn phím.
 
 II. Mô tả chung về trò chơi.
 Trò chơi tên Snake Game, được lấy cảm hứng chính từ trò chơi con rắn cổ điển, xây dựng theo phong cách đồ họa pixel và bổ sung thêm một số tính năng: Tường chặn, chọn chế độ tường chặn, ăn lá chắn giúp bất tử một thời gian, tính điểm, tăng tốc độ khi điểm tăng.
