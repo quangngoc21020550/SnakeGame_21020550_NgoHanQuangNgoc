@@ -579,6 +579,7 @@ void printText(SDL_Renderer *ren, string text, SDL_Color textColor, int fontSize
     desRect.w = srcRest.w;
     desRect.h = srcRest.h;
     SDL_RenderCopy(ren, texture, &srcRest, &desRect);
+    TTF_Quit();
 }
 
 void resetGame(vector<Wall> &aroundWall) {
