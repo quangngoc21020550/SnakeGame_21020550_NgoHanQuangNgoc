@@ -479,6 +479,7 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& 
         wall.location.y = SCREENH-10;
         aroundWall.push_back(wall);
         if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+        if(wall.location.x == shield.location.x && wall.location.y == shield.location.y) shield.changeLocation();
         wall.printWall();
     }
     for (int i = 0; i < SCREENH;i=i+10) {
@@ -486,6 +487,7 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& 
         wall.location.y = i;
         aroundWall.push_back(wall);
         if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+        if(wall.location.x == shield.location.x && wall.location.y == shield.location.y) shield.changeLocation();
         wall.printWall();
     }
     for (int i = 0; i < SCREENH;i=i+10) {
@@ -493,6 +495,7 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& 
         wall.location.y = i;
         aroundWall.push_back(wall);
         if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+        if(wall.location.x == shield.location.x && wall.location.y == shield.location.y) shield.changeLocation();
         wall.printWall();
     }
     if(playerChoice == "Advanced Wall") {
@@ -501,6 +504,7 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& 
             wall.location.y = i +(SCREENH/40)*10;
             aroundWall.push_back(wall);
             if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+            if(wall.location.x == shield.location.x && wall.location.y == shield.location.y) shield.changeLocation();
             wall.printWall();
         }
         for (int i = 0; i < 50; i = i+10) {
@@ -508,6 +512,7 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& 
             wall.location.y = i +(SCREENH/40)*10;
             aroundWall.push_back(wall);
             if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+            if(wall.location.x == shield.location.x && wall.location.y == shield.location.y) shield.changeLocation();
             wall.printWall();
         }
         for (int i = 0; i < 50; i = i+10) {
@@ -515,6 +520,7 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& 
             wall.location.y = (SCREENH/40)*30 - i;
             aroundWall.push_back(wall);
             if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+            if(wall.location.x == shield.location.x && wall.location.y == shield.location.y) shield.changeLocation();
             wall.printWall();
         }
         for (int i = 0; i < 50; i = i+10) {
@@ -522,6 +528,7 @@ void createWallAround(Wall wall, vector<Wall> &aroundWall, Apple &apple, Apple& 
             wall.location.y = (SCREENH/40)*30-i;
             aroundWall.push_back(wall);
             if(wall.location.x == apple.location.x && wall.location.y == apple.location.y) apple.changeLocation();
+            if(wall.location.x == shield.location.x && wall.location.y == shield.location.y) shield.changeLocation();
             wall.printWall();
         }
     }
