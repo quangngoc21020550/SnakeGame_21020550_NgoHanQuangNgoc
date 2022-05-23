@@ -12,7 +12,7 @@ I. Cài đặt chương trình.
 4. Cài đặt SDL tại https://www.libsdl.org/download-2.0.php#source, SDL_ttf tại https://www.libsdl.org/projects/SDL_ttf/release/ (tải file có tên "SDL2_ttf-2.0.18.dmg";và add vào frameworks của máy như hướng dẫn trong link https://lazyfoo.net/tutorials/SDL/01_hello_SDL/mac/index.php (làm y hệt tương tự với SDL_ttf).
 5. Link SDL với code: https://youtu.be/gDTlVV9hgtk.
 6. Bấm Run hoặc Cmd+R để chạy chương trình (chương trình hiện Run Succeed nghĩa là đã thành công).
-7. Lưu ý quan trọng khi chạy chương trình: https://youtu.be/Ovy8_nQbE-w. (Do kênh Youtube kia bị quá giới hạn upload video nên em dùng kênh Youtube khác ạ).
+7. Lưu ý quan trọng khi chạy chương trình (Sửa các đường dẫn file): https://youtu.be/Ovy8_nQbE-w. (Do kênh Youtube kia bị quá giới hạn upload video nên em dùng kênh Youtube khác ạ).
 8. Sau khi đã vào màn hình game, chọn "START!", chọn chế độ chơi, và điều hướng rắn bằng các nút mũi tên trên bàn phím.
 
 II. Mô tả chung về trò chơi.
